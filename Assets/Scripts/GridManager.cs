@@ -2,14 +2,24 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
+    [Header("Grid Settings")]
     public int gridWidth = 10;
     public int gridHeight = 10;
     public GameObject cellPrefab;
+
+    [Header("References")]
+    public SelectionManager selectionManager;
+
     private Cell[,] gridCells;
 
     void Start()
     {
         gridCells = new Cell[gridWidth, gridHeight];
+
+        // Find SelectionManager if not assigned
+        if (selectionManager == null)
+            selectionManager = FindFirstObjectByType<SelectionManager>();
+
         CreateGrid();
     }
 
@@ -42,8 +52,16 @@ public class GridManager : MonoBehaviour
     private void OnCellClicked(Cell clickedCell)
     {
         Debug.Log($"Cell clicked at position ({clickedCell.gridX}, {clickedCell.gridY})");
-        // Add your cell click logic here
-        // For example: select cell, move unit, show cell info, etc.
+
+        // Pass the click to the SelectionManager
+        if (selectionManager != null)
+        {
+            selectionManager.OnCellClicked(clickedCell);
+        }
+        else
+        {
+            Debug.LogWarning("SelectionManager not found! Cell selection will not work properly.");
+        }
     }
 
     private void OnCellHovered(Cell hoveredCell)
@@ -66,7 +84,7 @@ public class GridManager : MonoBehaviour
     public Cell GetCellAtWorldPosition(Vector3 worldPosition)
     {
         int x = Mathf.RoundToInt(worldPosition.x);
-        int y = Mathf.RoundToInt(worldPosition.y);
+        int y = Mathf.RoundToInt(worldPosition.z);
         return GetCell(x, y);
     }
 
