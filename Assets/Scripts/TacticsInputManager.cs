@@ -11,6 +11,7 @@ public class TacticsInputManager : MonoBehaviour
 
     [Header("References")]
     public GridManager gridManager;
+    public SelectionManager selectionManager;
     public Camera mainCamera;
 
     // Input Action references
@@ -32,6 +33,10 @@ public class TacticsInputManager : MonoBehaviour
         // Get grid manager if not assigned
         if (gridManager == null)
             gridManager = FindFirstObjectByType<GridManager>();
+
+        // Get selection manager if not assigned
+        if (selectionManager == null)
+            selectionManager = FindFirstObjectByType<SelectionManager>();
     }
 
     private void OnEnable()
@@ -82,7 +87,24 @@ public class TacticsInputManager : MonoBehaviour
             if (cell != null)
             {
                 Debug.Log($"Clicked on cell: {cell}");
-                // The cell's own OnMouseDown will handle the click event
+
+                // Pass the click to the SelectionManager through GridManager
+                // This will trigger the cell's OnMouseDown and then the GridManager's OnCellClicked
+                // which will then call SelectionManager.OnCellClicked
+
+                // Alternatively, you could call the SelectionManager directly:
+                if (selectionManager != null)
+                {
+                    selectionManager.OnCellClicked(cell);
+                }
+            }
+            else
+            {
+                // Clicked on empty space - clear selection
+                if (selectionManager != null)
+                {
+                    selectionManager.ClearSelection();
+                }
             }
         }
 
