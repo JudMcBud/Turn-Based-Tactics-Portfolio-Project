@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Cell class for individual grid tiles with customizable properties
@@ -46,7 +47,11 @@ public class Cell : MonoBehaviour
 
     void OnMouseDown()
     {
-        OnCellClicked?.Invoke(this);
+        // Check if the primary action (left mouse button) was pressed
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            OnCellClicked?.Invoke(this);
+        }
     }
 
     void OnMouseEnter()
