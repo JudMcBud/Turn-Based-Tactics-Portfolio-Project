@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7307388056898956724}
   - component: {fileID: 345733424618563300}
   - component: {fileID: 7273222937408628189}
+  - component: {fileID: 4095135793071369999}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -86,3 +87,34 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4095135793071369999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9153990954104044473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aa7cbad536cd9e4f90114916eb6c7c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitName: Unit
+  unitType: 0
+  team: 0
+  maxHealthPoints: 100
+  currentHealthPoints: 0
+  attackPower: 20
+  defense: 10
+  resistance: 10
+  speed: 15
+  movementDistance: 2
+  canMoveThisTurn: 1
+  canActThisTurn: 1
+  gridPosition: {x: 0, y: 0}
+  occupiedCell: {fileID: 0}
+  isStunned: 0
+  isPoisoned: 0
+  isBuffed: 0
+  gridManager: {fileID: 0}
+  selectionManager: {fileID: 0}
