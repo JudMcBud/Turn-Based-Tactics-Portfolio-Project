@@ -193,8 +193,8 @@ public class Unit : MonoBehaviour
             {
                 occupiedCell.SetOccupant(gameObject);
                 // Update world position to match cell
-                //TODO: Verify that the unit doesn not get placed at the corner of the cell
                 transform.position = occupiedCell.GetWorldPosition();
+                transform.position += Vector3.up * 0.8f;
             }
         }
 
