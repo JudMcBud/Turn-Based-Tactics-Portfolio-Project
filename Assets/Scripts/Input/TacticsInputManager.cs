@@ -80,19 +80,51 @@ public class TacticsInputManager : MonoBehaviour
 
         Debug.Log($"Primary action at screen: {screenPos}, world: {worldPos}");
 
-        // Try to get the cell at this position
+        // Perform a raycast to see what was clicked
+        Ray ray = mainCamera.ScreenPointToRay(screenPos);
+        RaycastHit hit;
+
+        // First, try to detect if we clicked on a unit (they should be higher up)
+        if (Physics.Raycast(ray, out hit))
+        {
+            Debug.Log($"Raycast hit: {hit.collider.gameObject.name}");
+
+            // Check if we hit a unit
+            Unit clickedUnit = hit.collider.GetComponent<Unit>();
+            if (clickedUnit != null)
+            {
+                Debug.Log($"Clicked on unit: {clickedUnit.unitName}");
+                if (selectionManager != null)
+                {
+                    selectionManager.SelectUnit(clickedUnit);
+                }
+                // Notify other systems
+                OnPrimaryActionPerformed?.Invoke(worldPos);
+                return;
+            }
+
+            // Check if we hit a cell
+            Cell clickedCell = hit.collider.GetComponent<Cell>();
+            if (clickedCell != null)
+            {
+                Debug.Log($"Clicked on cell: ({clickedCell.gridX}, {clickedCell.gridY})");
+                if (selectionManager != null)
+                {
+                    selectionManager.OnCellClicked(clickedCell);
+                }
+                // Notify other systems
+                OnPrimaryActionPerformed?.Invoke(worldPos);
+                return;
+            }
+        }
+
+        // If we didn't hit anything specific, try to get the cell at this position as fallback
         if (gridManager != null)
         {
             Cell cell = gridManager.GetCellAtWorldPosition(worldPos);
             if (cell != null)
             {
-                Debug.Log($"Clicked on cell: {cell}");
-
-                // Pass the click to the SelectionManager through GridManager
-                // This will trigger the cell's OnMouseDown and then the GridManager's OnCellClicked
-                // which will then call SelectionManager.OnCellClicked
-
-                // Alternatively, you could call the SelectionManager directly:
+                Debug.Log($"Fallback - clicked on cell: ({cell.gridX}, {cell.gridY})");
                 if (selectionManager != null)
                 {
                     selectionManager.OnCellClicked(cell);
@@ -101,9 +133,10 @@ public class TacticsInputManager : MonoBehaviour
             else
             {
                 // Clicked on empty space - clear selection
+                Debug.Log("Clicked on empty space - clearing selection");
                 if (selectionManager != null)
                 {
-                    selectionManager.ClearSelection();
+                    selectionManager.ClearAllSelections();
                 }
             }
         }

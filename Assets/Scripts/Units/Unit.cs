@@ -34,6 +34,12 @@ public class Unit : MonoBehaviour
     [SerializeField] private bool isPoisoned = false;
     [SerializeField] private bool isBuffed = false;
 
+    [Header("Visual Feedback")]
+    [SerializeField] private GameObject selectionIndicator;
+    [SerializeField] private Material selectedMaterial;
+    [SerializeField] private Material defaultMaterial;
+    private Renderer unitRenderer;
+
     [Header("References")]
     public GridManager gridManager;
     public SelectionManager selectionManager;
@@ -73,6 +79,25 @@ public class Unit : MonoBehaviour
             gridManager = FindFirstObjectByType<GridManager>();
         if (selectionManager == null)
             selectionManager = FindFirstObjectByType<SelectionManager>();
+
+        // Ensure unit has a collider for mouse detection
+        if (GetComponent<Collider>() == null)
+        {
+            // Add a capsule collider if none exists
+            CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
+            collider.height = 2.0f;
+            collider.radius = 0.5f;
+            collider.center = new Vector3(0, 1, 0);
+            Debug.Log($"Added collider to unit: {unitName}");
+        }
+
+        // Get the unit renderer for visual feedback
+        unitRenderer = GetComponent<Renderer>();
+        if (unitRenderer == null)
+            unitRenderer = GetComponentInChildren<Renderer>();
+
+        // Initialize selection indicator as hidden
+        UpdateSelectionIndicator(false);
     }
 
     private void Start()
@@ -84,6 +109,33 @@ public class Unit : MonoBehaviour
         if (occupiedCell != null)
         {
             occupiedCell.SetOccupant(gameObject);
+        }
+    }
+
+    private void OnEnable()
+    {
+        // Reset visual state
+        if (unitRenderer != null && defaultMaterial != null)
+        {
+            unitRenderer.material = defaultMaterial;
+        }
+
+        // Update the selection indicator state
+        UpdateSelectionIndicator();
+    }
+
+    private void OnDestroy()
+    {
+        // Clean up cell occupation when unit is destroyed
+        if (occupiedCell != null)
+        {
+            occupiedCell.SetOccupant(null);
+        }
+
+        // Remove from selection if currently selected
+        if (selectionManager != null && selectionManager.CurrentSelectedUnit == this)
+        {
+            selectionManager.DeselectCurrentUnit();
         }
     }
 
@@ -442,38 +494,51 @@ public class Unit : MonoBehaviour
         Debug.Log($"{unitName} attacks {target.unitName}!");
     }
 
-    #endregion
-
-    // Debug display in editor
-    private void OnDrawGizmos()
+    /// <summary>
+    /// Shows or hides the selection indicator
+    /// </summary>
+    public void SetSelected(bool selected)
     {
-        if (!IsAlive) return;
+        UpdateSelectionIndicator(selected);
 
-        // Draw health bar above unit
-        Vector3 pos = transform.position + Vector3.up * 2f;
-        float healthPercent = (float)currentHealthPoints / maxHealthPoints;
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(pos - Vector3.right * 0.5f, pos + Vector3.right * 0.5f);
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawLine(pos - Vector3.right * 0.5f,
-                       pos - Vector3.right * 0.5f + Vector3.right * healthPercent);
-
-        // Draw movement range when selected
-        if (selectionManager != null && selectionManager.CurrentSelectedCell != null &&
-            selectionManager.CurrentSelectedCell.occupant == gameObject)
+        // Change material if materials are assigned
+        if (unitRenderer != null && selectedMaterial != null && defaultMaterial != null)
         {
-            Gizmos.color = Color.blue;
-            Cell[] movementCells = GetMovementRange();
-            foreach (Cell cell in movementCells)
-            {
-                Gizmos.DrawWireCube(cell.transform.position + Vector3.up * 0.1f, Vector3.one * 0.8f);
-            }
+            unitRenderer.material = selected ? selectedMaterial : defaultMaterial;
         }
     }
-}
 
+    /// <summary>
+    /// Updates the selection indicator visual
+    /// </summary>
+    private void UpdateSelectionIndicator(bool show = false)
+    {
+        if (selectionIndicator != null)
+        {
+            selectionIndicator.SetActive(show);
+        }
+    }
+
+    #endregion
+
+    #region Mouse Detection
+
+    private void OnMouseDown()
+    {
+        // Check if this unit can be selected (only select our own units)
+        if (team == Team.Player && selectionManager != null)
+        {
+            selectionManager.SelectUnit(this);
+        }
+        else if (selectionManager != null)
+        {
+            Debug.Log($"Cannot select {unitName} - not a player unit or no selection manager");
+        }
+    }
+
+    // ...existing code...
+}
+#endregion
 #region Enums
 
 public enum Team
