@@ -18,7 +18,7 @@ public class GridManager : MonoBehaviour
 
         // Find SelectionManager if not assigned
         if (selectionManager == null)
-            selectionManager = FindFirstObjectByType<SelectionManager>();
+            selectionManager = ComponentFinder.GetSelectionManager();
 
         CreateGrid();
     }

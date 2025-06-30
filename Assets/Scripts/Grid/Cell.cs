@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// Cell class for individual grid tiles with customizable properties
@@ -43,15 +42,6 @@ public class Cell : MonoBehaviour
         // Set initial color
         currentColor = defaultColor;
         UpdateVisual();
-    }
-
-    void OnMouseDown()
-    {
-        // Check if the primary action (left mouse button) was pressed
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            OnCellClicked?.Invoke(this);
-        }
     }
 
     void OnMouseEnter()
@@ -190,15 +180,15 @@ public class Cell : MonoBehaviour
         return transform.position;
     }
 
-    // Distance calculation for pathfinding
+    // Distance calculation for pathfinding - using GridUtilities
     public float GetDistanceTo(Cell otherCell)
     {
-        return Vector2.Distance(new Vector2(gridX, gridY), new Vector2(otherCell.gridX, otherCell.gridY));
+        return GridUtilities.GetEuclideanDistance(this, otherCell);
     }
 
     public int GetManhattanDistanceTo(Cell otherCell)
     {
-        return Mathf.Abs(gridX - otherCell.gridX) + Mathf.Abs(gridY - otherCell.gridY);
+        return GridUtilities.GetManhattanDistance(this, otherCell);
     }
 
     // Debug information
