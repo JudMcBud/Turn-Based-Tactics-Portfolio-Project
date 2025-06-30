@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Centralized utility for finding common game components
 /// Reduces duplicate FindFirstObjectByType calls across the codebase
+/// Automatically clears cache on scene changes to prevent stale references
 /// </summary>
 public static class ComponentFinder
 {
@@ -10,6 +12,46 @@ public static class ComponentFinder
     private static SelectionManager _selectionManager;
     private static TacticsInputManager _inputManager;
     private static Camera _mainCamera;
+    private static bool _isInitialized = false;
+
+    /// <summary>
+    /// Initialize scene event listeners for automatic cache clearing
+    /// </summary>
+    static ComponentFinder()
+    {
+        InitializeSceneEvents();
+    }
+
+    /// <summary>
+    /// Sets up scene load/unload event handlers
+    /// </summary>
+    private static void InitializeSceneEvents()
+    {
+        if (!_isInitialized)
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+            _isInitialized = true;
+        }
+    }
+
+    /// <summary>
+    /// Called when a scene is loaded - clears the cache to ensure fresh references
+    /// </summary>
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ClearCache();
+        Debug.Log($"[ComponentFinder] Cache cleared for scene: {scene.name}");
+    }
+
+    /// <summary>
+    /// Called when a scene is unloaded - clears the cache to prevent stale references
+    /// </summary>
+    private static void OnSceneUnloaded(Scene scene)
+    {
+        ClearCache();
+        Debug.Log($"[ComponentFinder] Cache cleared for unloaded scene: {scene.name}");
+    }
 
     /// <summary>
     /// Gets the GridManager instance, caching it for performance
@@ -53,6 +95,7 @@ public static class ComponentFinder
 
     /// <summary>
     /// Clears the cached references - call this when scene changes
+    /// This is automatically called on scene load/unload events
     /// </summary>
     public static void ClearCache()
     {
@@ -60,6 +103,16 @@ public static class ComponentFinder
         _selectionManager = null;
         _inputManager = null;
         _mainCamera = null;
+    }
+
+    /// <summary>
+    /// Manually clears cache and re-initializes scene events (useful for testing)
+    /// </summary>
+    public static void ForceReinitialize()
+    {
+        ClearCache();
+        _isInitialized = false;
+        InitializeSceneEvents();
     }
 
     /// <summary>
