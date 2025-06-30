@@ -44,9 +44,9 @@ public class GameSystemTester : MonoBehaviour
 
     private void FindManagers()
     {
-        gridManager = FindFirstObjectByType<GridManager>();
-        selectionManager = FindFirstObjectByType<SelectionManager>();
-        inputManager = FindFirstObjectByType<TacticsInputManager>();
+        gridManager = ComponentFinder.GetGridManager();
+        selectionManager = ComponentFinder.GetSelectionManager();
+        inputManager = ComponentFinder.GetInputManager();
     }
 
     /// <summary>
@@ -57,6 +57,9 @@ public class GameSystemTester : MonoBehaviour
         LogTest("=== STARTING COMPREHENSIVE GAME SYSTEM TESTS ===");
         testsPassed = 0;
         totalTests = 0;
+
+        //Give other components time to initialize
+        yield return new WaitForSeconds(testDelay);
 
         if (testGridSystem)
         {
@@ -174,7 +177,7 @@ public class GameSystemTester : MonoBehaviour
             // Test unit movement
             if (testUnits[0] != null)
             {
-                Cell targetCell = gridManager.GetCell(3, 0);
+                Cell targetCell = gridManager.GetCell(3, 1);
                 if (targetCell != null)
                 {
                     bool moveResult = testUnits[0].MoveTo(targetCell);
