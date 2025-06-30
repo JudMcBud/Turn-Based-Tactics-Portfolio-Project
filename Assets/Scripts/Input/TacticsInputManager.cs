@@ -32,11 +32,11 @@ public class TacticsInputManager : MonoBehaviour
 
         // Get grid manager if not assigned
         if (gridManager == null)
-            gridManager = FindFirstObjectByType<GridManager>();
+            gridManager = ComponentFinder.GetGridManager();
 
         // Get selection manager if not assigned
         if (selectionManager == null)
-            selectionManager = FindFirstObjectByType<SelectionManager>();
+            selectionManager = ComponentFinder.GetSelectionManager();
     }
 
     private void OnEnable()

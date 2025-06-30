@@ -13,10 +13,10 @@ public class SelectionTest : MonoBehaviour
     {
         // Find references if not assigned
         if (selectionManager == null)
-            selectionManager = FindFirstObjectByType<SelectionManager>();
+            selectionManager = ComponentFinder.GetSelectionManager();
 
         if (gridManager == null)
-            gridManager = FindFirstObjectByType<GridManager>();
+            gridManager = ComponentFinder.GetGridManager();
     }
 
     private void OnEnable()
@@ -75,21 +75,11 @@ public class SelectionTest : MonoBehaviour
     {
         if (gridManager == null || centerCell == null) return;
 
-        // Define the 4 directions (up, down, left, right)
-        Vector2[] directions = {
-            Vector2.up,     // (0, 1)
-            Vector2.down,   // (0, -1)
-            Vector2.left,   // (-1, 0)
-            Vector2.right   // (1, 0)
-        };
+        Cell[] adjacentCells = GridUtilities.GetAdjacentCells(new Vector2Int(centerCell.gridX, centerCell.gridY), gridManager);
 
-        foreach (Vector2 direction in directions)
+        foreach (Cell adjacentCell in adjacentCells)
         {
-            int adjacentX = centerCell.gridX + (int)direction.x;
-            int adjacentY = centerCell.gridY + (int)direction.y;
-
-            Cell adjacentCell = gridManager.GetCell(adjacentX, adjacentY);
-            if (adjacentCell != null && adjacentCell.CanMoveTo())
+            if (adjacentCell.CanMoveTo())
             {
                 adjacentCell.Highlight(highlight);
             }

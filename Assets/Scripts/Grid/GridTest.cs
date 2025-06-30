@@ -16,10 +16,10 @@ public class GridTest : MonoBehaviour
     {
         // Find references if not assigned
         if (gridManager == null)
-            gridManager = FindFirstObjectByType<GridManager>();
+            gridManager = ComponentFinder.GetGridManager();
 
         if (inputManager == null)
-            inputManager = FindFirstObjectByType<TacticsInputManager>();
+            inputManager = ComponentFinder.GetInputManager();
     }
 
     private void OnEnable()
@@ -45,7 +45,7 @@ public class GridTest : MonoBehaviour
         // Find GridManager if not assigned
         if (gridManager == null)
         {
-            gridManager = FindFirstObjectByType<GridManager>();
+            gridManager = ComponentFinder.GetGridManager();
             if (gridManager == null)
             {
                 Debug.LogError("GridManager not found in scene!");

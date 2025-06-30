@@ -76,9 +76,9 @@ public class Unit : MonoBehaviour
 
         // Find managers if not assigned
         if (gridManager == null)
-            gridManager = FindFirstObjectByType<GridManager>();
+            gridManager = ComponentFinder.GetGridManager();
         if (selectionManager == null)
-            selectionManager = FindFirstObjectByType<SelectionManager>();
+            selectionManager = ComponentFinder.GetSelectionManager();
 
         // Ensure unit has a collider for mouse detection
         if (GetComponent<Collider>() == null)
@@ -277,15 +277,6 @@ public class Unit : MonoBehaviour
             return false;
         }
 
-        // int distance = Mathf.Abs(targetCell.gridX - gridPosition.x) +
-        //               Mathf.Abs(targetCell.gridY - gridPosition.y);
-
-        // if (distance > MovementDistance)
-        // {
-        //     Debug.Log($"{unitName} cannot reach target cell - too far!");
-        //     return false;
-        // }
-
         SetGridPosition(targetCell.gridX, targetCell.gridY);
         canMoveThisTurn = false; // Used movement for this turn
 
@@ -326,13 +317,7 @@ public class Unit : MonoBehaviour
     /// </summary>
     private void ProcessStatusEffects()
     {
-        if (isPoisoned)
-        {
-            TakeDamage(5, DamageType.Magical); // Poison damage
-            Debug.Log($"{unitName} takes poison damage!");
-        }
-
-        // Add more status effect processing here
+        StatusEffectUtilities.ProcessTurnEffects(this, isPoisoned);
     }
 
     #endregion
@@ -344,9 +329,7 @@ public class Unit : MonoBehaviour
     /// </summary>
     private int GetModifiedAttack()
     {
-        int modifiedAttack = attackPower;
-        if (isBuffed) modifiedAttack = Mathf.RoundToInt(modifiedAttack * 1.2f);
-        return modifiedAttack;
+        return StatusEffectUtilities.ApplyStatusModifiers(attackPower, isBuffed, isStunned, StatType.Combat);
     }
 
     /// <summary>
@@ -354,9 +337,7 @@ public class Unit : MonoBehaviour
     /// </summary>
     private int GetModifiedDefense()
     {
-        int modifiedDefense = defense;
-        if (isBuffed) modifiedDefense = Mathf.RoundToInt(modifiedDefense * 1.2f);
-        return modifiedDefense;
+        return StatusEffectUtilities.ApplyStatusModifiers(defense, isBuffed, isStunned, StatType.Combat);
     }
 
     /// <summary>
@@ -364,9 +345,7 @@ public class Unit : MonoBehaviour
     /// </summary>
     private int GetModifiedResistance()
     {
-        int modifiedResistance = resistance;
-        if (isBuffed) modifiedResistance = Mathf.RoundToInt(modifiedResistance * 1.2f);
-        return modifiedResistance;
+        return StatusEffectUtilities.ApplyStatusModifiers(resistance, isBuffed, isStunned, StatType.Combat);
     }
 
     /// <summary>
@@ -374,9 +353,7 @@ public class Unit : MonoBehaviour
     /// </summary>
     private int GetModifiedSpeed()
     {
-        int modifiedSpeed = speed;
-        if (isBuffed) modifiedSpeed = Mathf.RoundToInt(modifiedSpeed * 1.2f);
-        return modifiedSpeed;
+        return StatusEffectUtilities.ApplyStatusModifiers(speed, isBuffed, isStunned, StatType.Combat);
     }
 
     /// <summary>
@@ -384,9 +361,7 @@ public class Unit : MonoBehaviour
     /// </summary>
     private int GetModifiedMovementDistance()
     {
-        int modifiedMovement = movementDistance;
-        if (isStunned) modifiedMovement = 0;
-        return modifiedMovement;
+        return StatusEffectUtilities.ApplyStatusModifiers(movementDistance, isBuffed, isStunned, StatType.Movement);
     }
 
     #endregion
@@ -444,26 +419,10 @@ public class Unit : MonoBehaviour
     {
         if (gridManager == null) return new Cell[0];
 
-        var cells = new System.Collections.Generic.List<Cell>();
-        int range = MovementDistance;
+        Cell[] allCellsInRange = GridUtilities.GetCellsInRange(gridPosition, MovementDistance, gridManager, false);
 
-        for (int x = gridPosition.x - range; x <= gridPosition.x + range; x++)
-        {
-            for (int y = gridPosition.y - range; y <= gridPosition.y + range; y++)
-            {
-                int distance = Mathf.Abs(x - gridPosition.x) + Mathf.Abs(y - gridPosition.y);
-                if (distance <= range && distance > 0) // Exclude current position
-                {
-                    Cell cell = gridManager.GetCell(x, y);
-                    if (cell != null && cell.CanMoveTo())
-                    {
-                        cells.Add(cell);
-                    }
-                }
-            }
-        }
-
-        return cells.ToArray();
+        // Filter for walkable cells only
+        return allCellsInRange.Where(cell => cell.CanMoveTo()).ToArray();
     }
 
     /// <summary>
@@ -475,8 +434,7 @@ public class Unit : MonoBehaviour
             return false;
 
         // Check if target is within attack range (adjacent for now)
-        int distance = Mathf.Abs(target.GridPosition.x - gridPosition.x) +
-                      Mathf.Abs(target.GridPosition.y - gridPosition.y);
+        int distance = GridUtilities.GetManhattanDistance(gridPosition, target.GridPosition);
 
         return distance == 1; // Adjacent cells only
     }
