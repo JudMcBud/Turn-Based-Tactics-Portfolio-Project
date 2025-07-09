@@ -477,6 +477,25 @@ public class Unit : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets unit stats (for testing and spawning purposes)
+    /// </summary>
+    public void SetStats(int maxHP, int attack, int def, int res, int spd, int movement)
+    {
+        maxHealthPoints = maxHP;
+        currentHealthPoints = maxHP; // Start at full health
+        attackPower = attack;
+        defense = def;
+        resistance = res;
+        speed = spd;
+        movementDistance = movement;
+
+        if (selectionManager != null)
+        {
+            Debug.Log($"[Unit] Stats updated for {unitName}: HP={maxHP}, ATK={attack}, DEF={def}, RES={res}, SPD={spd}, MOV={movement}");
+        }
+    }
+
     #endregion
 
     #region Mouse Detection
