@@ -57,6 +57,15 @@ public class SelectionManager : MonoBehaviour
             return;
         }
 
+        // Check if unit can be selected based on current turn phase
+        var turnMgr = ComponentFinder.GetTurnManager();
+        if (turnMgr != null && !turnMgr.CanSelectUnit(unitToSelect))
+        {
+            if (showSelectionDebug)
+                Debug.Log($"Cannot select {unitToSelect.unitName} - not their turn phase ({turnMgr.CurrentPhase})");
+            return;
+        }
+
         // If the same unit is clicked, toggle selection
         if (currentSelectedUnit == unitToSelect)
         {
@@ -200,6 +209,7 @@ public class SelectionManager : MonoBehaviour
             Debug.Log($"Selected cell at ({cellToSelect.gridX}, {cellToSelect.gridY})");
 
         // Notify other systems
+        Debug.Log($"Invoking OnCellSelected");
         OnCellSelected?.Invoke(currentSelectedCell);
     }
 

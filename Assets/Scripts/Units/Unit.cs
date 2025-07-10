@@ -502,14 +502,14 @@ public class Unit : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Check if this unit can be selected (only select our own units)
-        if (team == Team.Player && selectionManager != null)
+        // Let the SelectionManager handle team/phase validation
+        if (selectionManager != null)
         {
             selectionManager.SelectUnit(this);
         }
-        else if (selectionManager != null)
+        else
         {
-            Debug.Log($"Cannot select {unitName} - not a player unit or no selection manager");
+            Debug.LogWarning($"Cannot select {unitName} - no SelectionManager found");
         }
     }
 

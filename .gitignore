@@ -84,3 +84,7 @@ Thumbs.db
 *.unitypackage
 *.log
 UpgradeLog.htm
+/Assets/TextMesh Pro
+Assets/TextMesh Pro.meta
+UserSettings/Layouts/default-6000.dwlt
+UserSettings/Layouts/default-6000.dwlt

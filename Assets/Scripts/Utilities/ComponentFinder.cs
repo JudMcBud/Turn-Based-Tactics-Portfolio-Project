@@ -11,6 +11,7 @@ public static class ComponentFinder
     private static GridManager _gridManager;
     private static SelectionManager _selectionManager;
     private static TacticsInputManager _inputManager;
+    private static TurnManager _turnManager;
     private static Camera _mainCamera;
     private static bool _isInitialized = false;
 
@@ -94,6 +95,16 @@ public static class ComponentFinder
     }
 
     /// <summary>
+    /// Gets the TurnManager instance, caching it for performance
+    /// </summary>
+    public static TurnManager GetTurnManager()
+    {
+        if (_turnManager == null)
+            _turnManager = Object.FindFirstObjectByType<TurnManager>();
+        return _turnManager;
+    }
+
+    /// <summary>
     /// Clears the cached references - call this when scene changes
     /// This is automatically called on scene load/unload events
     /// </summary>
@@ -103,6 +114,7 @@ public static class ComponentFinder
         _selectionManager = null;
         _inputManager = null;
         _mainCamera = null;
+        _turnManager = null;
     }
 
     /// <summary>
@@ -143,6 +155,12 @@ public static class ComponentFinder
         if (GetMainCamera() == null)
         {
             Debug.LogError("Main Camera not found in scene!");
+            isValid = false;
+        }
+
+        if (GetTurnManager() == null)
+        {
+            Debug.LogError("TurnManager not found in scene!");
             isValid = false;
         }
 
